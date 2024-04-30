@@ -34,7 +34,7 @@ public class GroupService(IGroupRepository repository, ICodeGenerator codeGenera
 
     public IEnumerable<GroupViewModel> GetGroups(int accountId)
     {
-        var groups = repository.GetGroups(accountId);
+        var groups = repository.GetAllGroupMemberships(accountId);
 
         return groups.Select(g => new GroupViewModel
         {
@@ -42,12 +42,13 @@ public class GroupService(IGroupRepository repository, ICodeGenerator codeGenera
             Name = g.Name,
             Code = g.Code,
             OwnedByMe = g.OwnerId == accountId,
-            Members = repository.GetMembershipsForGroup(g.Id)
+            Members = g.Members
                 .Select(m => new MemberViewModel
                 {
-                    Id = m.AccountId,
-                    Name = m.Account.Name,
-                    IsOwner = g.OwnerId == m.AccountId
+                    Id = m.Id,
+                    Name = m.Name,
+                    Progress = m.Progress,
+                    IsOwner = g.OwnerId == m.Id
                 })
         });
     }
