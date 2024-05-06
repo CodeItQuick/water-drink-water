@@ -34,9 +34,9 @@ public class GroupService(IGroupRepository repository, ICodeGenerator codeGenera
 
     public IEnumerable<GroupViewModel> GetGroups(int accountId)
     {
-        var groups = repository.GetAllGroupMemberships(accountId);
+        var groups = repository.GetAllGroupsWithMembersAndDailyProgress(accountId);
 
-        return groups.Select(g => new GroupViewModel
+        var result = groups.Select(g => new GroupViewModel
         {
             Id = g.Id,
             Name = g.Name,
@@ -51,6 +51,8 @@ public class GroupService(IGroupRepository repository, ICodeGenerator codeGenera
                     IsOwner = g.OwnerId == m.Id
                 })
         });
+
+        return result;
     }
 
     public bool JoinGroup(string code, int accountId)

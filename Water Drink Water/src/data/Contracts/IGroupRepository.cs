@@ -12,5 +12,5 @@ public interface IGroupRepository
     void AddMembership(Membership membership);
 
     IEnumerable<Membership> GetMembershipsForGroup(int groupId);
-    IEnumerable<GroupResult> GetAllGroupMemberships(int accountId);
+    IEnumerable<GroupResult> GetAllGroupsWithMembersAndDailyProgress(int accountId);
 }

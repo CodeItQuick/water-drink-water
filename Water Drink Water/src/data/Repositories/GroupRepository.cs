@@ -49,23 +49,11 @@ public class GroupRepository(IDbContextFactory<ApplicationDbContext> factory) : 
         context.SaveChanges();
     }
 
-    public IEnumerable<GroupResult> GetAllGroupMemberships(int accountId)
+    public IEnumerable<GroupResult> GetAllGroupsWithMembersAndDailyProgress(int accountId)
     {
         using var context = factory.CreateDbContext();
 
-        var timeZoneLookup = (from p in context.Preferences
-                select new
-                {
-                    UserId = p.UserId,
-                    TimeZoneId = p.TimeZoneId
-                })
-            .Select(k => new
-            {
-                TimeZoneId = k.TimeZoneId,
-                TimeZoneOffsetHours = TimeZoneInfo.FindSystemTimeZoneById(k.TimeZoneId).BaseUtcOffset.Hours,
-                CurrentDate = DateTime.UtcNow
-                    .AddHours(TimeZoneInfo.FindSystemTimeZoneById(k.TimeZoneId).BaseUtcOffset.Hours).Date
-            }).ToList();
+        var timeZoneLookup = GetTimeZoneLookup(context);
 
         var groupsWithMembers = (from g in context.Groups
             join m in context.Memberships on g.Id equals m.GroupId
@@ -84,7 +72,7 @@ public class GroupRepository(IDbContextFactory<ApplicationDbContext> factory) : 
                         Name = m.Account.Name,
                         TimeZoneId = p.TimeZoneId,
                         TargetFluidOunces = p.TargetFluidOunces
-                    }).AsEnumerable()
+                    }).ToList()
             }).ToList();
 
         var results = from g in groupsWithMembers
@@ -98,18 +86,42 @@ public class GroupRepository(IDbContextFactory<ApplicationDbContext> factory) : 
                 Members = (from m in g.Members
                     join t in timeZoneLookup on m.TimeZoneId equals t.TimeZoneId
                     join l in context.Logs on m.Id equals l.UserId into logs
-                    select new GroupResult.MemberResult()
+                    select new GroupResult.MemberResult
                     {
                         Id = m.Id,
                         Name = m.Name,
-                        Progress = (int)((from log in logs.AsEnumerable()
-                            where log.UserId == m.Id &&
-                                  log.ConsumedOn.AddHours(t.TimeZoneOffsetHours).Date == t.CurrentDate
-                            select log.FluidOunces).Sum() / (double)m.TargetFluidOunces * 100)
-                    }).AsEnumerable()
+                        Progress = (int)(
+                            (
+                                from log in logs
+                                where log.UserId == m.Id &&
+                                      log.ConsumedOn.AddHours(t.TimeZoneOffsetHours).Date == t.CurrentDate
+                                select log.FluidOunces
+                            )
+                            .AsEnumerable()
+                            .Sum() / (double)m.TargetFluidOunces * 100)
+                    }).ToList()
             };
 
         return results.ToList();
+    }
+
+    private sealed record TimeZoneLookupInfo(string TimeZoneId, int TimeZoneOffsetHours, DateTime CurrentDate);
+
+    private static List<TimeZoneLookupInfo> GetTimeZoneLookup(ApplicationDbContext context)
+    {
+        var timeZoneLookup =
+            (from p in context.Preferences
+                select new
+                {
+                    UserId = p.UserId,
+                    TimeZoneId = p.TimeZoneId
+                })
+            .Distinct()
+            .Select(k => new TimeZoneLookupInfo(k.TimeZoneId,
+                TimeZoneInfo.FindSystemTimeZoneById(k.TimeZoneId).BaseUtcOffset.Hours,
+                DateTime.UtcNow.AddHours(TimeZoneInfo.FindSystemTimeZoneById(k.TimeZoneId).BaseUtcOffset.Hours).Date))
+            .ToList();
+        return timeZoneLookup;
     }
 
     public IEnumerable<Membership> GetMembershipsForGroup(int groupId)
