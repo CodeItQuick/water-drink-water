@@ -55,54 +55,48 @@ public class GroupRepository(IDbContextFactory<ApplicationDbContext> factory) : 
 
         var timeZoneLookup = GetTimeZoneLookup(context);
 
-        var groupsWithMembers = (from g in context.Groups
-            join m in context.Memberships on g.Id equals m.GroupId
-            join a in context.Accounts on m.AccountId equals a.Id
-            where g.OwnerId == accountId || m.AccountId == accountId
-            group new { Account = a } by new { g.Id }
-            into grp
-            select new
-            {
-                grp.Key.Id,
-                Members = (from m in grp
-                    join p in context.Preferences on m.Account.Id equals p.UserId
-                    select new
-                    {
-                        Id = m.Account.Id,
-                        Name = m.Account.Name,
-                        TimeZoneId = p.TimeZoneId,
-                        TargetFluidOunces = p.TargetFluidOunces
-                    }).ToList()
-            }).ToList();
+        var memberPreferencesByGroupId =
+            context.Groups
+                .Where(g => g.OwnerId == accountId || g.Memberships.Any(m => m.AccountId == accountId))
+                .SelectMany(g => g.Memberships)
+                .Select(m => new
+                {
+                    m.GroupId,
+                    Id = m.AccountId,
+                    m.Account.Name,
+                    m.Account.Preferences.TimeZoneId,
+                    m.Account.Preferences.TargetFluidOunces
+                })
+                .GroupBy(m => m.GroupId)
+                .ToList();
 
-        var results = from g in groupsWithMembers
-            join grp in context.Groups on g.Id equals grp.Id
+        var membersWithCalculatedDailyProgressByGroup =
+            from @group in memberPreferencesByGroupId
+            join groupInfo in context.Groups on @group.Key equals groupInfo.Id
             select new GroupResult
             {
-                Id = g.Id,
-                Name = grp.Name,
-                Code = grp.Code,
-                OwnerId = grp.OwnerId,
-                Members = (from m in g.Members
-                    join t in timeZoneLookup on m.TimeZoneId equals t.TimeZoneId
-                    join l in context.Logs on m.Id equals l.UserId into logs
+                Id = groupInfo.Id,
+                Name = groupInfo.Name,
+                Code = groupInfo.Code,
+                Members = (from member in @group
+                    join timeZone in timeZoneLookup on member.TimeZoneId equals timeZone.TimeZoneId
                     select new GroupResult.MemberResult
                     {
-                        Id = m.Id,
-                        Name = m.Name,
+                        Id = member.Id,
+                        Name = member.Name,
                         Progress = (int)(
                             (
-                                from log in logs
-                                where log.UserId == m.Id &&
-                                      log.ConsumedOn.AddHours(t.TimeZoneOffsetHours).Date == t.CurrentDate
+                                from log in context.Logs
+                                where log.UserId == member.Id &&
+                                      log.ConsumedOn.AddHours(timeZone.TimeZoneOffsetHours).Date == timeZone.CurrentDate
                                 select log.FluidOunces
                             )
                             .AsEnumerable()
-                            .Sum() / (double)m.TargetFluidOunces * 100)
+                            .Sum() / (double)member.TargetFluidOunces * 100)
                     }).ToList()
             };
 
-        return results.ToList();
+        return membersWithCalculatedDailyProgressByGroup.ToList();
     }
 
     private sealed record TimeZoneLookupInfo(string TimeZoneId, int TimeZoneOffsetHours, DateTime CurrentDate);

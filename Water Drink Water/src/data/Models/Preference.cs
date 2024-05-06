@@ -8,4 +8,6 @@ public class Preference
     public string TimeZoneId { get; set; } = null!;
     public DateTime CreatedOn { get; set; }
     public DateTime? UpdatedOn { get; set; }
+
+    public virtual Account Account { get; set; } = null!;
 }
