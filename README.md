@@ -4,7 +4,7 @@ An application to help you remember to drink water.
 
 This accompanies streams on https://twitch.tv/tbdgamer so, there are a few guidelines to follow with PRs.
 
-Guidelines
+## Guidelines
 
 - No major stand-alone PRs, i.e. Don't do a PR with "I made it DDD or Here's the project implemented with the 'right' architecture"
 - You're more than welcome to pick up existing issues and make a fix for them.
@@ -28,3 +28,11 @@ Guidelines
 - Bring the Debug Console Window into view, check it's running on the same port as what is specified in the 'createTestAccount.http' file, if not update it, save, then just above the word "POST", click "Send Request", you should see the record created.
 - Now check the Blazor Debug Console and navigate to the url, log in using the username '<test@nowhere.com>' and the password 'test'
 - You must be thirsty after that, drink water 😀
+
+## So, you found an issue?
+
+- Check the issues board, see if it's already reported there. 
+- If not, create a new issue and be as detailed as you can as to the problem. Screenshots / Steps to reproduce are always helpful.
+- If you're able to fix the issue, follow the steps to fork the repository and make a PR with the fix.
+- Don't forget there are unit tests, if your code changes existing code, there may be unit tests to update. 
+  - DO NOT be afraid if you've not done unit testing before, just reach-out (either on GitHub or in the Discord) and ask for a little assistance.- Don't worry if your fix breaks unit tests, we can work through that together on-stream and get them passing. What's more important is the experience, nothing is broken!- 
