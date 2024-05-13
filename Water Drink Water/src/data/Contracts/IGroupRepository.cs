@@ -1,4 +1,5 @@
 ﻿using TbdFriends.WaterDrinkWater.Data.Models;
+using TbdFriends.WaterDrinkWater.Data.Results;
 
 namespace TbdFriends.WaterDrinkWater.Data.Contracts;
 
@@ -11,4 +12,5 @@ public interface IGroupRepository
     void AddMembership(Membership membership);
 
     IEnumerable<Membership> GetMembershipsForGroup(int groupId);
+    IEnumerable<GroupResult> GetAllGroupsWithMembersAndDailyProgress(int accountId);
 }

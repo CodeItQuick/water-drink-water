@@ -34,22 +34,25 @@ public class GroupService(IGroupRepository repository, ICodeGenerator codeGenera
 
     public IEnumerable<GroupViewModel> GetGroups(int accountId)
     {
-        var groups = repository.GetGroups(accountId);
+        var groups = repository.GetAllGroupsWithMembersAndDailyProgress(accountId);
 
-        return groups.Select(g => new GroupViewModel
+        var result = groups.Select(g => new GroupViewModel
         {
             Id = g.Id,
             Name = g.Name,
             Code = g.Code,
             OwnedByMe = g.OwnerId == accountId,
-            Members = repository.GetMembershipsForGroup(g.Id)
+            Members = g.Members
                 .Select(m => new MemberViewModel
                 {
-                    Id = m.AccountId,
-                    Name = m.Account.Name,
-                    IsOwner = g.OwnerId == m.AccountId
+                    Id = m.Id,
+                    Name = m.Name,
+                    Progress = m.Progress,
+                    IsOwner = g.OwnerId == m.Id
                 })
         });
+
+        return result;
     }
 
     public bool JoinGroup(string code, int accountId)
