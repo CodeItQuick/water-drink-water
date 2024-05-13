@@ -1,13 +1,12 @@
-﻿using blazor.wa.tbd.Infrastructure;
-using blazor.wa.tbd.Services;
+﻿using blazor.wa.tbd.Services;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Authorization;
 
 namespace blazor.wa.tbd.Components;
 
 public partial class Login
 {
     private readonly LoginFormData formData = new();
+    [CascadingParameter] private ConsumptionStateProvider ConsumptionState { get; set; }
     [Inject] public UserService UserService { get; set; }
     [Inject] public NavigationManager NavigationManager { get; set; }
     [Inject] public AuthService AuthService { get; set; }
@@ -28,6 +27,7 @@ public partial class Login
         }
         else
         {
+            await ConsumptionState.RefreshContext();
             NavigationManager.NavigateTo("/log");
         }
     }
