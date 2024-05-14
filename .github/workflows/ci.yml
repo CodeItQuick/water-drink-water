@@ -17,6 +17,6 @@ jobs:
     - name: Setup .NET SDK
       uses: actions/setup-dotnet@v4
     - name: Build
-      run: dotnet build -c Release
+      run: dotnet build ./Water\ Drink\ Water/Water\ Drink\ Water.sln -c Release
     - name: Test
-      run: dotnet test -c Release --no-build     
+      run: dotnet test ./Water\ Drink\ Water/Water\ Drink\ Water.sln -c Release --no-build     
