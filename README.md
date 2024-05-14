@@ -1,5 +1,7 @@
 # water-drink-water
 
+[![Run Unit Tests](https://github.com/tbd-friends/water-drink-water/actions/workflows/ci.yml/badge.svg)](https://github.com/tbd-friends/water-drink-water/actions/workflows/ci.yml)
+
 An application to help you remember to drink water.
 
 This accompanies streams on https://twitch.tv/tbdgamer so, there are a few guidelines to follow with PRs.
