@@ -14,6 +14,7 @@ This accompanies streams on https://twitch.tv/tbdgamer so, there are a few guide
 - All PRs will be reviewed on stream
 - There's no "right" or "wrong", "bad" or "good" but making a PR doesn't mean it will get merged.
 - These guidelines aren't final
+- Have an idea for the project, a problem or a challenge? Let's discuss https://github.com/tbd-friends/water-drink-water/discussions/
 
 ## Getting Started
 
