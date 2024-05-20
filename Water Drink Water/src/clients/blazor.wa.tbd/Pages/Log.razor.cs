@@ -22,6 +22,7 @@ public partial class Log
         {
             ("6:30 am", "1 Glass")
         },
+        [("2024", "5", "18")] = new ()
     };
 
     private async Task LogConsumption()

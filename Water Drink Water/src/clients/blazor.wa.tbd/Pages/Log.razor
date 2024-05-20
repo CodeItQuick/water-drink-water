@@ -26,10 +26,14 @@
         <div class="col-md-6">
             <h2>Amount Consumed</h2>
         </div>
-        @if (Logs.ContainsKey((
-                    $"{LogDatePicker.Year}", 
-                    $"{LogDatePicker.Month}", 
-                    $"{LogDatePicker.Day}")))
+
+        @{
+            var logsExistForDay = Logs.ContainsKey((
+                $"{LogDatePicker.Year}", 
+                $"{LogDatePicker.Month}", 
+                $"{LogDatePicker.Day}"));
+        }
+        @if (logsExistForDay)
         {
             @foreach (var log in Logs[(
                           $"{LogDatePicker.Year}", 
@@ -43,6 +47,17 @@
                     <h2>@log.Item2</h2>
                 </div>
             }
+        }
+        @if(logsExistForDay == false) 
+        {
+            <div class="col-md-12">Day Not In Logged Consumptions</div>
+        }
+        @if(logsExistForDay == true && Logs[(
+                $"{LogDatePicker.Year}", 
+                $"{LogDatePicker.Month}", 
+                $"{LogDatePicker.Day}")].Any() == false) 
+        {
+            <div class="col-md-12">No Water Consumed</div>
         }
     </div>
 </div>
