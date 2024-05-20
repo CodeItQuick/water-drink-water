@@ -12,4 +12,37 @@
             <button class="btn btn-primary" onclick="@(async () => await LogConsumption())">Log</button>
         </div>
     </div>
+    <div class="row">
+        <div class="col-md-12">
+            <input id="log-date-picker" 
+                   type="date" 
+                   min="2020-01-01"
+                   max="2030-01-01"
+                   @bind="LogDatePicker" />
+        </div>
+        <div class="col-md-6">
+            <h2>Time Consumed</h2>
+        </div>
+        <div class="col-md-6">
+            <h2>Amount Consumed</h2>
+        </div>
+        @if (Logs.ContainsKey((
+                    $"{LogDatePicker.Year}", 
+                    $"{LogDatePicker.Month}", 
+                    $"{LogDatePicker.Day}")))
+        {
+            @foreach (var log in Logs[(
+                          $"{LogDatePicker.Year}", 
+                          $"{LogDatePicker.Month}", 
+                          $"{LogDatePicker.Day}")] )
+            {
+                <div class="col-md-6">
+                    <h2>@log.Item1</h2>
+                </div>
+                <div class="col-md-6">
+                    <h2>@log.Item2</h2>
+                </div>
+            }
+        }
+    </div>
 </div>
